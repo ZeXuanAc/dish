@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美食命运 - 沉浸式体验</title>
+    
+    <!-- 添加音频元素 -->
+    <audio id="bgMusic" loop>
+        <!-- OSS链接选项 - 需替换为您自己的OSS链接 -->
+        <!-- <source src="https://your-oss-bucket.oss-cn-region.aliyuncs.com/music/background.mp3" type="audio/mpeg"> -->
+        <!-- 本地音乐选项 - 需将音乐文件放在项目目录下 -->
+        <source src="./background.mp3" type="audio/mpeg">
+        您的浏览器不支持音频元素。
+    </audio>
+    
+    <!-- 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- 图标 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #fff;
+            --accent-color: #ff8da1;
+            --secondary-color: #ffd2dc;
+            --text-color: #fff;
+            --background-color: #ff9fb4;  /* 更鲜艳的粉色 */
+            --background-color-deep: #d96c95;  /* 更深的玫瑰色，增强对比 */
+            --shadow-color: rgba(0, 0, 0, 0.25);
+            --overlay-color: rgba(255, 255, 255, 0.15);
+            --highlight-color: #ffe1e7;
+            --transition-time: 0.8s;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            height: 100%;
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+        
+        /* 全屏页面容器 */
+        .fullscreen-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform var(--transition-time) ease-in-out, opacity var(--transition-time) ease-in-out;
+            background-color: var(--background-color);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.25) 0%, transparent 40%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 添加装饰性背景图案 */
+        .fullscreen-container:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.828-1.415 1.415L51.8 0h2.827zM5.373 0l-.83.828L5.96 2.243 8.2 0H5.374zM48.97 0l3.657 3.657-1.414 1.414L46.143 0h2.828zM11.03 0L7.372 3.657 8.787 5.07 13.857 0H11.03zm32.284 0L49.8 6.485 48.384 7.9l-7.9-7.9h2.83zM16.686 0L10.2 6.485 11.616 7.9l7.9-7.9h-2.83zm20.97 0l9.315 9.314-1.414 1.414L34.828 0h2.83zM22.344 0L13.03 9.314l1.414 1.414L25.172 0h-2.83zM32 0l12.142 12.142-1.414 1.414L30 2.828 17.272 15.556l-1.414-1.414L28 0h4zM.284 0l28 28-1.414 1.414L0 2.544V0h.284zM0 5.373l25.456 25.455-1.414 1.415L0 8.2V5.374zm0 5.656l22.627 22.627-1.414 1.414L0 13.86v-2.83zm0 5.656l19.8 19.8-1.415 1.413L0 19.514v-2.83zm0 5.657l16.97 16.97-1.414 1.415L0 25.172v-2.83zM0 28l14.142 14.142-1.414 1.414L0 30.828V28zm0 5.657L11.314 44.97 9.9 46.386l-9.9-9.9v-2.828zm0 5.657L8.485 47.8 7.07 49.212 0 42.143v-2.83zm0 5.657l5.657 5.657-1.414 1.415L0 47.8v-2.83zm0 5.657l2.828 2.83-1.414 1.413L0 53.456v-2.83zM54.627 60L30 35.373 5.373 60H8.2L30 38.2 51.8 60h2.827zm-5.656 0L30 41.03 11.03 60h2.828L30 43.858 46.142 60h2.83zm-5.656 0L30 46.686 16.686 60h2.83L30 49.515 40.485 60h2.83zm-5.657 0L30 52.343 22.344 60h2.83L30 55.172 34.828 60h2.83zM32 60l-2-2-2 2h4zM59.716 0l-28 28 1.414 1.414L60 2.544V0h-.284zM60 5.373L34.544 30.828l1.414 1.415L60 8.2V5.374zm0 5.656L37.373 33.656l1.414 1.414L60 13.86v-2.83zm0 5.656l-19.8 19.8 1.415 1.413L60 19.514v-2.83zm0 5.657l-16.97 16.97 1.414 1.415L60 25.172v-2.83zM60 28L45.858 42.142l1.414 1.414L60 30.828V28zm0 5.657L48.686 44.97l1.415 1.415 9.9-9.9v-2.828zm0 5.657L51.515 47.8l1.414 1.413 7.07-7.07v-2.83zm0 5.657l-5.657 5.657 1.414 1.415L60 47.8v-2.83zm0 5.657l-2.828 2.83 1.414 1.413L60 53.456v-2.83zM39.9 16.385l1.414-1.414L30 3.657 18.686 14.97l1.415 1.415 9.9-9.9 9.9 9.9zm-2.83 2.828l1.415-1.414L30 9.313 21.515 17.8l1.414 1.413L30 11.8l7.07 7.414z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* 新的可爱进度展示容器 */
+        .progress-container {
+            width: 100%;
+            max-width: 200px;
+            margin-bottom: 50px;
+            position: relative;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 可爱的杯子蛋糕设计 */
+        .cupcake-container {
+            position: relative;
+            width: 150px;
+            height: 180px;
+            margin: 0 auto;
+            z-index: 2;
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.1));
+        }
+        
+        /* 美化杯子底部 - 增加更精致的纹理和细节 */
+        .cupcake-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 30px;
+            background: linear-gradient(to bottom, #f8c66c 0%, #e9a94a 100%);
+            border-radius: 40px 40px 15px 15px;
+            z-index: 1;
+            box-shadow: inset -5px 0 10px -5px rgba(0,0,0,0.15), 
+                        inset 5px 0 10px -5px rgba(255,255,255,0.2);
+            /* 添加微妙的光泽 */
+            overflow: hidden;
+        }
+        
+        /* 底部面包纹理 */
+        .cupcake-base::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 0.1) 1px,
+                transparent 2px
+            );
+            background-size: 8px 8px;
+            border-radius: 40px 40px 15px 15px;
+        }
+        
+        /* 面包边缘光泽 */
+        .cupcake-base::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+            border-radius: 40px 40px 0 0;
+        }
+        
+        /* 汉堡肉 */
+        .cupcake-body {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 35px;
+            background: linear-gradient(to bottom, #9e5d39, #7c4b27);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 2;
+            box-shadow: 0 5px 10px -5px rgba(0,0,0,0.3);
+        }
+        
+        /* 肉饼纹理 */
+        .cupcake-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(172, 105, 66, 0.8) 3px, transparent 4px),
+                radial-gradient(circle at 70% 40%, rgba(172, 105, 66, 0.8) 2px, transparent 3px),
+                radial-gradient(circle at 40% 70%, rgba(172, 105, 66, 0.8) 2px, transparent 3px),
+                radial-gradient(circle at 80% 10%, rgba(172, 105, 66, 0.8) 2px, transparent 3px);
+            opacity: 0.7;
+        }
+        
+        /* 肉顶部光泽 */
+        .cupcake-body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+        }
+        
+        /* 生菜和其他配料层 */
+        .cupcake-frosting {
+            position: absolute;
+            bottom: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 0; /* 初始高度为0，随进度增加 */
+            max-height: 60px;
+            background: linear-gradient(135deg, #7cd926 0%, #5eb31b 100%);
+            border-radius: 10px;
+            z-index: 3;
+            transition: height 0.3s ease;
+            box-shadow: 0 -2px 10px -2px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        /* 生菜层纹理 */
+        .frosting-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0) 0px 3px,
+                    rgba(255,255,255,0.15) 3px 6px
+                );
+            border-radius: 10px;
+            opacity: 0.7;
+        }
+        
+        /* 上面的面包 */
+        .cupcake-topping {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 30px;
+            background: linear-gradient(to bottom, #f8c66c 10%, #e9a94a 100%);
+            border-radius: 15px 15px 40px 40px;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0; /* 初始隐藏，接近100%时显示 */
+            transition: all 0.5s ease;
+        }
+        
+        /* 上面面包的芝麻 */
+        .cupcake-topping::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.9) 1px, transparent 2px),
+                radial-gradient(circle at 35% 10%, rgba(255, 255, 255, 0.9) 1px, transparent 2px),
+                radial-gradient(circle at 55% 15%, rgba(255, 255, 255, 0.9) 1px, transparent 2px),
+                radial-gradient(circle at 75% 10%, rgba(255, 255, 255, 0.9) 1px, transparent 2px),
+                radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.9) 1px, transparent 2px),
+                radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.9) 1px, transparent 2px),
+                radial-gradient(circle at 65% 25%, rgba(255, 255, 255, 0.9) 1px, transparent 2px);
+            opacity: 0.8;
+        }
+        
+        /* 糖珠装饰 */
+        .sugar-sprinkles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0; /* 初始隐藏，随进度显示 */
+            transition: opacity 0.5s ease;
+        }
+        
+        .sprinkle {
+            position: absolute;
+            width: 5px;
+            height: 2px;
+            border-radius: 1px;
+            transform: rotate(var(--rotation));
+        }
+        
+        /* 顶部装饰 - 樱桃/草莓 */
+        .cupcake-topping {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle at 30% 30%, #ff4d7a, #ff3366);
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0; /* 初始隐藏，接近100%时显示 */
+            transition: all 0.5s ease;
+        }
+        
+        /* 樱桃叶子 */
+        .cherry-leaf {
+            position: absolute;
+            top: -8px;
+            right: -6px;
+            width: 16px;
+            height: 10px;
+            background: #7cd658;
+            border-radius: 50% 50% 0 50%;
+            transform: rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* 樱桃高光 */
+        .cupcake-topping::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 25%;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+        }
+        
+        /* 进度文字显示优化 */
+        .progress-text {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff6b9e;
+            text-shadow: 0 1px 2px rgba(255,107,158,0.3);
+            z-index: 6;
+            background: rgba(255,255,255,0.4);
+            padding: 5px 12px;
+            border-radius: 20px;
+            box-shadow: 0 3px 10px -5px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+            animation: bounce-text 1.5s infinite alternate;
+        }
+        
+        @keyframes bounce-text {
+            0% { transform: translateX(-50%) translateY(0); }
+            100% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        /* 装饰元素 - 飘落的爱心 */
+        .heart-particles {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 15px;
+            color: rgba(255, 175, 188, 0.7);
+            animation: heart-fall linear forwards;
+            opacity: 0;
+        }
+        
+        @keyframes heart-fall {
+            0% { 
+                transform: translateY(-20px) rotate(0deg); 
+                opacity: 0.8; 
+            }
+            100% { 
+                transform: translateY(180px) rotate(90deg); 
+                opacity: 0; 
+            }
+        }
+        
+        /* 光晕效果 */
+        .glow-effect {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255,210,220,0.4) 0%, transparent 70%);
+            z-index: 0;
+            animation: pulse-glow 2s infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.6; }
+        }
+        
+        /* 装饰 - 星星点缀 */
+        .stars-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .star {
+            position: absolute;
+            font-size: 18px;
+            color: rgba(255, 223, 0, 0.6);
+            animation: star-twinkle 3s infinite alternate;
+        }
+        
+        @keyframes star-twinkle {
+            0% { transform: scale(0.8); opacity: 0.4; }
+            100% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        /* 完成后的庆祝效果 */
+        .completion-celebration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #ffafc5, #ff7eaa, #ff5c8a);
+            opacity: 0;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(200px) rotate(360deg); opacity: 0; }
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 14px 36px;
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-family: 'Noto Serif SC', serif;
+            font-size: 18px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            margin-top: 40px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 3;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: btnAppear 1.5s 1.3s forwards, btnGlow 2s ease-in-out infinite alternate;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover:after {
+            left: 100%;
+        }
+        
+        @keyframes btnGlow {
+            from { box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+            to { box-shadow: 0 0 15px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.4); }
+        }
+        
+        /* 体验页面 */
+        #experience-screen {
+            transform: translateY(100%);
+            opacity: 0;
+            background-color: var(--background-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #experience-screen:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            z-index: -1;
+        }
+        
+        /* 标题样式 */
+        .main-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 68px;
+            font-weight: 300;
+            margin-bottom: 35px;
+            color: var(--primary-color);
+            text-align: center;
+            line-height: 1.2;
+            position: relative;
+            z-index: 3;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.8s;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: titleFloat 5s ease-in-out infinite, titleAppear 1.5s 0.5s forwards;
+            margin-top: -50px; /* 向上移动标题 */
+        }
+        
+        .subtitle {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--primary-color);
+            opacity: 0;
+            margin-bottom: 80px;
+            position: relative;
+            z-index: 3;
+            letter-spacing: 2px;
+            transform: translateY(20px);
+            animation: subtitleAppear 1.5s 1s forwards;
+        }
+        
+        /* 分散文字效果 */
+        .spaced-text {
+            display: inline-block;
+            letter-spacing: 8px;
+            font-size: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* 底部状态栏 */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(217, 108, 149, 0.5);
+            backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+        
+        .chapter-info {
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .controls button {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 18px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .controls button:hover {
+            opacity: 1;
+        }
+        
+        /* 顶部导航 */
+        .header-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .logo {
+            height: 40px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-link:hover {
+            opacity: 1;
+        }
+        
+        /* 加载完成后的文字 */
+        .loading-complete {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            text-align: center;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        
+        /* 动画关键帧 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 添加卡牌样式 */
+        .card-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.7s ease;
+        }
+        
+        .card-container.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .food-card {
+            width: 280px;
+            height: 420px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 1.2s;
+            transform-style: preserve-3d;
+        }
+        
+        .food-card.flipped .card-inner {
+            transform: rotateY(180deg);
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+            transform: translateZ(0);
+            will-change: transform;
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #a57c38, #d4af37, #a57c38);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-diamond {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.8);
+            transform: rotate(45deg);
+            position: relative;
+        }
+        
+        .card-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px;
+            height: 160px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+        }
+        
+        .card-ticks {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+        }
+        
+        .tick {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            transform-origin: center top;
+        }
+        
+        .card-pattern {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .corner-design {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .top-left {
+            top: 10px;
+            left: 10px;
+            border-right: none;
+            border-bottom: none;
+            border-top-left-radius: 10px;
+        }
+        
+        .top-right {
+            top: 10px;
+            right: 10px;
+            border-left: none;
+            border-bottom: none;
+            border-top-right-radius: 10px;
+        }
+        
+        .bottom-left {
+            bottom: 10px;
+            left: 10px;
+            border-right: none;
+            border-top: none;
+            border-bottom-left-radius: 10px;
+        }
+        
+        .bottom-right {
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
+            border-bottom-right-radius: 10px;
+        }
+        
+        .card-back-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .card-img-container {
+            height: 60%;
+            overflow: hidden;
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .card-text {
+            padding: 15px;
+            height: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fc9fad;
+            margin-bottom: 10px;
+            font-family: 'Noto Serif SC', serif;
+        }
+        
+        .card-description {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        /* 隐藏关闭按钮 */
+        .close-btn {
+            display: none;
+        }
+        
+        /* 优化卡牌旋转动画，缩短时间 */
+        @keyframes cardSpin {
+            0% { transform: rotateY(0deg); }
+            70% { transform: rotateY(1080deg); } /* 减少为3圈 */
+            100% { transform: rotateY(1260deg); } /* 最后减少为3.5圈 */
+        }
+        
+        .card-inner.spinning {
+            animation: cardSpin 2s cubic-bezier(0.4, 0, 0.2, 1) forwards; /* 从3.5秒减少到2秒 */
+            will-change: transform;
+            transform-style: preserve-3d;
+        }
+        
+        /* 移除背面隐藏，允许在旋转过程中适时显示背面 */
+        .food-card .card-inner .card-back {
+            opacity: 1;
+        }
+        
+        /* 卡牌背面翻转效果 */
+        .food-card.flipped .card-inner {
+            transform: rotateY(180deg);
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        /* 新增动画关键帧 */
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes titleAppear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes subtitleAppear {
+            to { opacity: 0.9; transform: translateY(0); }
+        }
+        
+        @keyframes btnAppear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 背景聚焦效果 */
+        .focus-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, rgba(255, 182, 193, 0.7) 100%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 2s;
+        }
+        
+        .focus-overlay.active {
+            opacity: 1;
+        }
+        
+        /* 删除食物粒子相关样式 */
+        .food-particles,
+        .food-particle,
+        .focus-overlay {
+            display: none;
+        }
+        
+        /* 卡组区域样式 */
+        .card-deck-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around !important; /* 改为空间分布 */
+            align-items: center; /* 水平居中 */
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform var(--transition-time) ease-in-out, opacity var(--transition-time) ease-in-out;
+            background-color: var(--background-color-deep);
+            background-image: 
+                radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+            box-shadow: inset 0 0 150px rgba(159, 82, 114, 0.1); /* 将黑色阴影改为粉色调阴影，降低不透明度 */
+            z-index: 10;
+            padding: 60px 0; /* 添加上下内边距 */
+        }
+        
+        .card-deck-container.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* 卡组样式 */
+        .card-deck {
+            margin: 20px auto; /* 恢复一些上下边距 */
+            perspective: 1000px;
+            position: relative;
+            transform-style: preserve-3d;
+            width: 220px;  /* 保持固定宽度 */
+            height: 300px; /* 保持固定高度 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateX(0); /* 移除水平偏移 */
+        }
+        
+        /* 恢复卡组卡片样式，并添加菱形图案 */
+        .deck-card {
+            position: absolute;
+            width: 200px;
+            height: 280px;
+            background: linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(204, 146, 93, 0.35); /* 将黑边阴影改为金色调阴影，更加柔和 */
+            transform-style: preserve-3d;
+            border: 2px solid rgba(255, 233, 191, 0.5); /* 更改为更柔和的金色边框 */
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateZ(-100px) scale(0.01) rotateY(180deg);
+            opacity: 0;
+            overflow: hidden;
+        }
+        
+        .deck-card.active {
+            opacity: 1;
+            transform: translateZ(0) scale(1) rotateY(0);
+            box-shadow: 0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25); /* 为激活状态添加柔和的双层阴影效果 */
+        }
+        
+        /* 卡片背面菱形图案 */
+        .deck-card:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2); /* 修改为与card-back:before一致的白色 */
+            transform: translate(-50%, -50%) rotate(45deg);
+            border: 2px solid rgba(255, 255, 255, 0.3); /* 修改为与card-back:before一致的白色边框 */
+        }
+        
+        .deck-card:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3); /* 修改为与card-back:after一致的白色 */
+            transform: translate(-50%, -50%) rotate(45deg);
+            border: 2px solid rgba(255, 255, 255, 0.4); /* 修改为与card-back:after一致的白色边框 */
+        }
+        
+        /* 卡片背面样式 */
+        .card-inner .card-back {
+            background: linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        /* 卡片背面菱形装饰 */
+        .card-back:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%) rotate(45deg);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .card-back:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) rotate(45deg);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        /* 卡片飞入动画 */
+        .fly-in-card {
+            position: absolute;
+            width: 200px;
+            height: 280px;
+            background: linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(204, 146, 93, 0.35); /* 更新为与deck-card一致的阴影样式 */
+            border: 2px solid rgba(255, 233, 191, 0.5); /* 更新为与deck-card一致的边框 */
+            opacity: 0;
+            z-index: 5;
+            top: 50%;
+            left: 50%;
+            margin-top: -140px;
+            margin-left: -100px;
+            transform-origin: center center;
+            overflow: hidden;
+        }
+        
+        /* 卡片背面菱形图案 - 也应用到飞入卡片 */
+        .fly-in-card:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%) rotate(45deg);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .fly-in-card:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) rotate(45deg);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        /* 抽卡动画 */
+        @keyframes drawCard {
+            0% { 
+                transform: translate(0, 0) scale(1) rotateY(0); 
+                box-shadow: 0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25);
+            }
+            50% { 
+                transform: translate(0, -50px) scale(1.1) rotateY(0);
+                box-shadow: 0 15px 35px rgba(204, 146, 93, 0.4), 0 0 20px rgba(255, 215, 148, 0.3);
+            }
+            100% { 
+                transform: translate(0, 0) scale(1.4) rotateY(0);
+                box-shadow: 0 20px 40px rgba(204, 146, 93, 0.45), 0 0 25px rgba(255, 215, 148, 0.35);
+            }
+        }
+        
+        .drawing-card {
+            animation: drawCard 0.8s forwards;
+            z-index: 100;
+        }
+        
+        /* 卡组指示文字 */
+        .deck-instruction {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 26px; /* 稍微调小指示文字大小 */
+            color: var(--primary-color);
+            margin-bottom: 35px; /* 增加与卡组间距 */
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
+        }
+        
+        .deck-instruction.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 飞入动画 */
+        @keyframes flyInCard {
+            0% { 
+                transform: translate(var(--start-x), var(--start-y)) scale(0.3) rotate(var(--rotation));
+                opacity: 0;
+                box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            }
+            70% {
+                opacity: 1;
+                box-shadow: 0 8px 25px rgba(204, 146, 93, 0.35), 0 0 10px rgba(255, 215, 148, 0.2);
+            }
+            100% { 
+                transform: translate(var(--end-x), var(--end-y)) scale(1) rotate(0deg); 
+                opacity: 1;
+                box-shadow: 0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25);
+            }
+        }
+        
+        /* 添加页面过渡动画 */
+        @keyframes pageTransition {
+            0% { background-color: var(--background-color); }
+            50% { background-color: #eb7d9b; } /* 中间过渡色 */
+            100% { background-color: var(--background-color-deep); }
+        }
+        
+        /* 卡片装饰元素 */
+        .card-decoration {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .decoration-top-left {
+            top: 10%;
+            left: 10%;
+            width: 250px;
+            height: 250px;
+            opacity: 0.8;
+        }
+        
+        .decoration-bottom-right {
+            bottom: 10%;
+            right: 10%;
+            width: 350px;
+            height: 350px;
+            opacity: 0.6;
+        }
+        
+        /* 卡组背景浮动元素 */
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.08);
+            filter: blur(12px);
+            animation: float 15s infinite alternate ease-in-out;
+            z-index: 0;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(20px, 20px) rotate(5deg); }
+        }
+        
+        /* 添加丰富背景纹理和动态元素 */
+        .pattern-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* 动态背景气泡 */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,255,255,0.1) 60%, transparent);
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.3);
+            animation: float-bubble 20s infinite ease-in-out;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        @keyframes float-bubble {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(10px, 15px) rotate(5deg); }
+            50% { transform: translate(5px, 25px) rotate(-3deg); }
+            75% { transform: translate(-10px, 10px) rotate(3deg); }
+        }
+        
+        /* 美食图标装饰 */
+        .food-icon {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            opacity: 0.15;
+            filter: brightness(1.5);
+            z-index: 1;
+            transform: rotate(var(--rotation));
+            animation: icon-float 15s infinite alternate ease-in-out;
+        }
+        
+        @keyframes icon-float {
+            0% { transform: rotate(var(--rotation)) translateY(0); }
+            100% { transform: rotate(calc(var(--rotation) + 10deg)) translateY(-15px); }
+        }
+        
+        /* 渐变光晕效果 */
+        .glow-effect {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,175,189,0.2) 0%, transparent 70%);
+            filter: blur(50px);
+            opacity: 0.6;
+            animation: glow-pulse 8s infinite alternate ease-in-out;
+            mix-blend-mode: soft-light;
+            z-index: 0;
+        }
+        
+        @keyframes glow-pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0.7; }
+        }
+        
+        /* 背景纹理层 */
+        .texture-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: 0;
+            opacity: 0.5;
+        }
+        
+        /* 滚动线条背景 */
+        .animated-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            opacity: 0.06;
+            z-index: 0;
+        }
+        
+        .animated-line {
+            position: absolute;
+            height: 1px;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            animation-name: line-scroll;
+            animation-duration: 15s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+        
+        @keyframes line-scroll {
+            0% { transform: translateY(-50%) translateX(-100%); }
+            100% { transform: translateY(-50%) translateX(100%); }
+        }
+        
+        /* 卡组页面背景增强 */
+        .card-deck-container:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M0 0h80v80H0V0zm20 20v40h40V20H20zm20 35a15 15 0 1 1 0-30 15 15 0 0 1 0 30z' fill-rule='evenodd'/%3E%3C/g%3E%3C/svg%3E");
+            z-index: -1;
+        }
+        
+        /* 卡组页标题和说明文字位置调整 */
+        .card-deck-container .main-title {
+            margin-top: -20px; /* 之前是-100px，大幅减少上移距离 */
+            margin-bottom: 30px; /* 增加与指示文字间距 */
+        }
+
+        /* 调整卡组与按钮间距 */
+        .card-deck-container .btn {
+            margin-top: 40px; /* 增加卡组与按钮的间距 */
+        }
+
+        /* 添加响应式布局调整 */
+        @media (max-height: 700px) {
+            .main-title {
+                font-size: 55px; /* 更小的字体 */
+                margin-top: -30px;
+                margin-bottom: 25px; /* 较小的间距 */
+            }
+            
+            .subtitle {
+                margin-bottom: 60px; /* 较小的间距 */
+                font-size: 20px; /* 更小的字体 */
+            }
+            
+            .card-deck-container .main-title {
+                margin-top: 20px; /* 正值使标题下移 */
+                font-size: 48px;
+                margin-bottom: 20px;
+            }
+            
+            .deck-instruction {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+            
+            .btn {
+                margin-top: 30px; /* 较小的间距 */
+                padding: 12px 30px; /* 稍小的按钮 */
+            }
+            
+            .card-deck-container .btn {
+                margin-top: 30px;
+            }
+        }
+
+        /* 为移动设备优化整体布局 */
+        @media (max-width: 768px) {
+            /* 减小标题字体大小 */
+            .main-title {
+                font-size: 54px;
+            }
+            
+            /* 调整卡组页标题位置，使其视觉上更平衡 */
+            .card-deck-container .main-title {
+                margin-top: 20px; /* 正值使标题下移 */
+                font-size: 48px;
+            }
+            
+            /* 适当减小指示文字尺寸 */
+            .deck-instruction {
+                font-size: 24px;
+                margin-top: 20px;
+            }
+            
+            /* 确保卡组位置合适 */
+            .card-deck {
+                margin: 10px auto;
+            }
+            
+            /* 减小按钮大小 */
+            .btn {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+        }
+
+        /* 针对非常小的屏幕的额外调整 */
+        @media (max-width: 375px) {
+            .main-title {
+                font-size: 46px;
+                margin-top: 10px;
+            }
+            
+            .card-deck-container .main-title {
+                font-size: 42px;
+                margin-top: 30px;
+            }
+            
+            .deck-instruction {
+                font-size: 22px;
+            }
+            
+            /* 适当调整卡组尺寸 */
+            .card-deck {
+                width: 200px;
+                height: 280px;
+            }
+            
+            .deck-card {
+                width: 180px;
+                height: 250px;
+            }
+        }
+
+        /* 确保卡组容器在移动设备上有合适的内边距 */
+        .card-deck-container {
+            padding: 40px 20px; /* 减少上下内边距，增加左右内边距 */
+        }
+
+        /* 食物图标基本样式 - 确保所有图标都在盘子内 */
+        .food-icon {
+            position: absolute;
+            opacity: 0;
+            transition: all 0.5s ease;
+            transform: scale(0.5);
+            font-size: 22px; /* 减小字体大小 */
+            z-index: 4;
+            /* 添加可爱的发光效果 */
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
+        }
+
+        .food-icon.active {
+            opacity: 1;
+            transform: scale(1);
+            /* 修改弹跳动画减少上下移动幅度 */
+            animation: bounce-icon 1s infinite alternate;
+        }
+
+        @keyframes bounce-icon {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-3px) scale(1.05); } /* 减少弹跳高度和缩放比例 */
+        }
+
+        /* 重新定位所有食物图标，确保它们都在盘子内部 */
+        .food-icon:nth-child(1) {
+            top: 20px;
+            left: 30px;
+        }
+
+        .food-icon:nth-child(2) {
+            top: 20px;
+            right: 30px;
+        }
+
+        .food-icon:nth-child(3) {
+            bottom: 20px;
+            left: 30px;
+        }
+
+        .food-icon:nth-child(4) {
+            bottom: 20px;
+            right: 30px;
+        }
+
+        .food-icon:nth-child(5) {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            font-size: 32px;
+        }
+
+        /* 为额外添加的图标设置位置 */
+        .food-icon:nth-child(6) {
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .food-icon:nth-child(7) {
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .food-icon:nth-child(8) {
+            top: 50%;
+            left: 25px;
+            transform: translateY(-50%);
+        }
+
+        .food-icon:nth-child(9) {
+            top: 50%;
+            right: 25px;
+            transform: translateY(-50%);
+        }
+
+        .food-icon:nth-child(10) {
+            top: 75px;
+            left: 75px;
+        }
+
+        /* 限制彩虹光环的大小和位置，确保它不会超出盘子 */
+        .rainbow-ring {
+            position: absolute;
+            width: 160px; /* 减小尺寸 */
+            height: 160px; /* 减小尺寸 */
+            top: -5px; /* 调整位置 */
+            left: -5px; /* 调整位置 */
+            border-radius: 50%;
+            background: linear-gradient(90deg, 
+                #ff9a9e 0%, 
+                #fad0c4 17%, 
+                #ffecd2 34%, 
+                #fcb69f 51%, 
+                #fda085 68%, 
+                #f6d365 85%, 
+                #fda085 100%);
+            background-size: 200% 200%;
+            z-index: 0;
+            opacity: 0.4;
+            animation: rainbow-move 8s linear infinite;
+        }
+
+        /* 调整盘子旋转动画的速度，使其更平缓 */
+        @keyframes gentle-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 调整盘子边框，确保内容不会溢出 */
+        .food-plate {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 4px solid rgba(255, 235, 245, 0.95);
+            overflow: hidden; /* 确保所有内容都被裁剪在盘子内 */
+            z-index: 2;
+            margin: 0 auto;
+            animation: gentle-rotate 20s infinite linear; /* 减慢旋转速度 */
+        }
+
+        /* 添加卡片背面菱形控制样式 */
+        .food-card.hide-diamonds .card-back:before,
+        .food-card.hide-diamonds .card-back:after {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 加载屏幕 -->
+    <div id="loading-screen" class="fullscreen-container loading">
+        <h1 class="main-title">美食命运</h1>
+        <div class="progress-container">
+            <div class="glow-effect"></div>
+            
+            <div class="stars-container">
+                <div class="star" style="top: 10%; left: 10%;">✨</div>
+                <div class="star" style="top: 70%; left: 80%;">✨</div>
+                <div class="star" style="top: 30%; left: 85%;">✨</div>
+            </div>
+            
+            <div class="heart-particles" id="heart-particles"></div>
+            
+            <div class="cupcake-container">
+                <div class="cupcake-base"></div>
+                <div class="cupcake-body"></div>
+                <div class="cupcake-frosting" id="cupcake-frosting">
+                    <div class="frosting-texture"></div>
+                    <div class="frosting-sparkles" id="frosting-sparkles">
+                        <div class="sparkle" style="top: 20%; left: 30%;"></div>
+                        <div class="sparkle" style="top: 50%; left: 70%;"></div>
+                        <div class="sparkle" style="top: 70%; left: 40%;"></div>
+                        <div class="sparkle" style="top: 30%; left: 60%;"></div>
+                    </div>
+                </div>
+                <div class="cupcake-topping" id="cupcake-topping"></div>
+                <div class="progress-text">
+                    <span id="progress-percent">0%</span>
+                </div>
+            </div>
+            
+            <div class="completion-celebration" id="completion-celebration"></div>
+        </div>
+        
+        <!-- 添加光晕效果 -->
+        <div class="loading-glow"></div>
+        
+        <div id="loading-complete" class="loading-complete" style="display: none;">
+           菲菲，准备好探索美食的奥秘了吗？
+        </div>
+        <button id="start-btn" class="btn" style="display: none;">开始体验</button>
+    </div>
+    
+    <!-- 体验屏幕 -->
+    <div id="experience-screen" class="fullscreen-container">
+        <!-- 顶部导航 -->
+        <div class="header-nav">
+        </div>
+        
+        <h1 class="main-title">美食<br>与生活</h1>
+        <p class="subtitle">探索属于你的美食命运</p>
+        
+        <!-- 按钮区域 -->
+        <button id="discover-btn" class="btn">发现美食</button>
+        
+        <!-- 底部状态栏 -->
+        <div class="status-bar">
+            <div class="chapter-info">美食发现 | 沉浸体验</div>
+            <div class="controls">
+                <button id="sound-toggle"><i class="fas fa-volume-up"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加卡牌容器 -->
+    <div id="card-container" class="card-container">
+        <button id="close-card" class="close-btn"><i class="fas fa-times"></i></button>
+        <div id="food-card" class="food-card">
+            <div class="card-inner">
+                <div class="card-face card-front">
+                    <div class="card-pattern"></div>
+                    <div class="corner-design top-left"></div>
+                    <div class="corner-design top-right"></div>
+                    <div class="corner-design bottom-left"></div>
+                    <div class="corner-design bottom-right"></div>
+                    <div class="card-circle"></div>
+                    <div id="card-ticks" class="card-ticks"></div>
+                    <div class="card-diamond"></div>
+                </div>
+                <div class="card-face card-back">
+                    <div class="card-back-content">
+                        <div class="card-img-container">
+                            <img id="food-img" class="card-img" src="" alt="">
+                        </div>
+                        <div class="card-text">
+                            <h3 id="food-name" class="card-title"></h3>
+                            <p id="food-description" class="card-description"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 获取音频元素
+        const bgMusic = document.getElementById('bgMusic');
+        let isMuted = false;
+        
+        // 页面加载完成后尝试自动播放音乐
+        window.onload = function() {
+            // 尝试自动播放
+            bgMusic.play().catch(error => {
+                console.log('自动播放失败，需要用户交互: ', error);
+            });
+        };
+        
+        // 修正DOM元素的初始化顺序
+        // 首先创建卡组容器元素
+        const cardDeckContainer = document.createElement('div');
+        cardDeckContainer.className = 'card-deck-container';
+        cardDeckContainer.innerHTML = `
+            <div class="header-nav"></div>
+            <h1 class="main-title">美食卡牌</h1>
+            <p class="deck-instruction">公主请翻牌！</p>
+            <div class="card-deck" id="card-deck"></div>
+            <button id="discover-food-btn" class="btn">发现美食</button>
+            <div class="status-bar">
+                <div class="chapter-info">美食卡牌 | 抽卡体验</div>
+                <div class="controls">
+                    <button id="sound-toggle-2"><i class="fas fa-volume-up"></i></button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(cardDeckContainer);
+
+        // 获取所有DOM元素
+        const progressFill = document.getElementById('progress-fill');
+        const progressPercent = document.getElementById('progress-percent');
+        const loadingComplete = document.getElementById('loading-complete');
+        const startBtn = document.getElementById('start-btn');
+        const loadingScreen = document.getElementById('loading-screen');
+        const experienceScreen = document.getElementById('experience-screen');
+        const discoverBtn = document.getElementById('discover-btn');
+        const cardContainer = document.getElementById('card-container');
+
+        // 获取卡组相关元素
+        const cardDeck = document.getElementById('card-deck');
+        const discoverFoodBtn = document.getElementById('discover-food-btn');
+        const deckInstruction = document.querySelector('.deck-instruction');
+
+        // 获取卡牌相关DOM元素
+        const foodCard = document.getElementById('food-card');
+        const closeCardBtn = document.getElementById('close-card');
+        const foodImg = document.getElementById('food-img');
+        const foodName = document.getElementById('food-name');
+        const foodDescription = document.getElementById('food-description');
+        const cardTicks = document.getElementById('card-ticks');
+        const loadingGlow = document.querySelector('.loading-glow');
+        const foodIcons = document.querySelectorAll('.food-icon');
+
+        // 获取盘子进度元素
+        const plateProgress = document.getElementById('plate-progress');
+
+        // 修改模拟加载进度部分
+        let progress = 0;
+
+        // 激活加载光晕
+        loadingGlow.classList.add('active');
+
+        // 替换原有进度更新函数
+        function updateProgress(currentProgress) {
+            // 更新进度文本
+            progressPercent.textContent = `${Math.floor(currentProgress)}%`;
+            
+            // 更新生菜层高度
+            const frosting = document.getElementById('cupcake-frosting');
+            const maxHeight = 60; // 生菜层最大高度
+            const newHeight = (currentProgress / 100) * maxHeight;
+            frosting.style.height = `${newHeight}px`;
+            
+            // 装饰显示
+            const sparkles = document.getElementById('frosting-sparkles');
+            if (currentProgress >= 30) {
+                sparkles.style.opacity = (currentProgress - 30) / 70;
+            }
+            
+            // 顶部面包显示
+            const topping = document.getElementById('cupcake-topping');
+            if (currentProgress >= 80) {
+                topping.style.opacity = (currentProgress - 80) / 20;
+            }
+            
+            // 添加心形粒子
+            if (currentProgress > 10 && currentProgress % 5 === 0) {
+                addHeartParticle();
+            }
+            
+            // 完成后的庆祝效果
+            if (currentProgress >= 100) {
+                triggerCompletionCelebration();
+            }
+        }
+
+        // 添加心形粒子
+        function addHeartParticle() {
+            const heartContainer = document.getElementById('heart-particles');
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '❤️';
+            heart.style.left = `${Math.random() * 100}%`;
+            heart.style.animationDuration = `${Math.random() * 2 + 3}s`;
+            
+            heartContainer.appendChild(heart);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
+        }
+
+        // 完成后的庆祝效果
+        function triggerCompletionCelebration() {
+            const celebrationContainer = document.getElementById('completion-celebration');
+            celebrationContainer.style.opacity = '1';
+            
+            // 创建五彩纸屑
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = '0';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 75%)`;
+                confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                celebrationContainer.appendChild(confetti);
+            }
+        }
+
+        // 修改模拟加载进度部分
+        const loadingInterval = setInterval(() => {
+            progress += Math.random() * 8; // 增加每次的进度增量
+            
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(loadingInterval);
+                
+                // 加载完成后的效果
+                loadingScreen.classList.remove('loading');
+                loadingScreen.classList.add('completed');
+                loadingGlow.classList.add('completed');
+                
+                // 显示加载完成文字和开始按钮
+                setTimeout(() => {
+                    loadingComplete.style.display = 'block';
+                    startBtn.style.display = 'block';
+                }, 800);
+            }
+            
+            // 更新进度
+            updateProgress(progress);
+            
+        }, 60); // 减少间隔时间
+
+        // 根据进度更新食物图标
+        function updateFoodIcons(currentProgress) {
+            // 根据进度逐个显示食物图标
+            if (currentProgress >= 20) {
+                foodIcons[0].classList.add('active');
+            }
+            if (currentProgress >= 40) {
+                foodIcons[1].classList.add('active');
+            }
+            if (currentProgress >= 60) {
+                foodIcons[2].classList.add('active');
+            }
+            if (currentProgress >= 80) {
+                foodIcons[3].classList.add('active');
+            }
+            if (currentProgress >= 95) {
+                foodIcons[4].classList.add('active');
+            }
+        }
+        
+        // 修改开始体验按钮点击事件 - 添加过渡效果
+        startBtn.addEventListener('click', () => {
+            // 尝试播放音乐
+            bgMusic.play().catch(e => console.log('点击按钮时播放失败:', e));
+            
+            // 隐藏加载屏幕
+            loadingScreen.style.transform = 'translateY(-100%)';
+            loadingScreen.style.opacity = '0';
+            
+            // 等加载页面消失后开始向卡组页面过渡
+            setTimeout(() => {
+                transitionToCardDeck();
+            }, 500);
+        });
+        
+        // 修改第一页的发现美食按钮 - 添加过渡效果
+        discoverBtn.addEventListener('click', () => {
+            // 尝试播放音乐
+            bgMusic.play().catch(e => console.log('点击按钮时播放失败:', e));
+            
+            // 开始转场动画
+            // 创建过渡元素
+            const transEl = document.createElement('div');
+            transEl.className = 'transition-element';
+            document.body.appendChild(transEl);
+            
+            // 执行转场
+            setTimeout(() => {
+                transitionToCardDeck();
+                transEl.remove();
+            }, 500);
+        });
+        
+        // 添加菜肴数据
+        const dishes = [
+    { 
+        "id": 1, 
+        "name": "牛肉米线", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/2.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T125226Z&x-oss-expires=604800&x-oss-signature=8e7a8300c7cb95ebaec5696d24d86b3cf6fb2c771d41ac279ebf7c930760306b&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "6小时牛骨熬汤，米线裹满胶质浓香，酸豆角脆爽点睛，嗦一口鲜到掉眉！"
+    },
+    { 
+        "id": 2, 
+        "name": "黄牛肉火锅", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/3.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T130520Z&x-oss-expires=604800&x-oss-signature=bd366485b25e4ae710f1f2b800b420cf76aabc0c525e24ad7a429a8df5483b26&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "现切黄牛肉涮煮沙茶酱，三起三落10秒脆嫩，冬日滋补必冲！"
+    },
+    { 
+        "id": 3, 
+        "name": "简单炒个菜", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/4.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T130612Z&x-oss-expires=604800&x-oss-signature=5d89cd5f855754a01eae14844a5cdea04257b1347285662910c692dddc2114af&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "铁锅爆炒镬气十足，青椒肉丝鲜辣带焦香，米饭杀手名不虚传！"
+    },
+    { 
+        "id": 4, 
+        "name": "酸辣粉", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/5.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T130644Z&x-oss-expires=604800&x-oss-signature=f7ec4fd72a48869eabf3adbd1461a32903456ae58db3aad448628940c8587df9&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "手工红薯粉Q弹挂汁，酸萝卜+糊辣壳双重暴击，吃完整碗都舔手指！"
+    },
+    { 
+        "id": 5, 
+        "name": "麦当劳", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/6.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T130708Z&x-oss-expires=604800&x-oss-signature=6bc40ad879902b1a07508cb462b409ad734a5fcec0b48e38bb0b2de69c3b5a4b&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "金黄薯条蘸绵密奶昔，巨无霸三层肉香轰炸，童年味道秒回校园门口！"
+    },
+    { 
+        "id": 6, 
+        "name": "小蛋糕", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/7.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T130810Z&x-oss-expires=604800&x-oss-signature=6f36866387e36c333c14b0783650b4aa16d0d7c12be249890d419c2e00ad819c&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "日式棉花蛋糕云朵口感，爆浆草莓酱心一抿化开，甜品控手机先吃！"
+    },
+    { 
+        "id": 7, 
+        "name": "袁记云饺", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/8.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T130828Z&x-oss-expires=604800&x-oss-signature=ccbfa4b7fd84c799ce00a504058ff00ab5b671793307d37293205c45f25f8645&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "竹升手工捶打虾饺皇，整颗虾仁透皮可见，广式早茶平价替代！"
+    },
+    { 
+        "id": 8, 
+        "name": "麻辣香锅", 
+        "image": "https://fei-p.oss-cn-hangzhou.aliyuncs.com/bjt/9.png?x-oss-credential=LTAI5tFrJ3sS2qiVtYtY6XYB%2F20250329%2Fcn-hangzhou%2Foss%2Faliyun_v4_request&x-oss-date=20250329T130845Z&x-oss-expires=604800&x-oss-signature=7fc3f33ddcb3e2d137b0959ceecd4957c6313cc1011ea780d6e4c7b4ee2e607f&x-oss-signature-version=OSS4-HMAC-SHA256",
+        "description": "30+食材随心配，魔鬼辣度挑战味蕾极限，香菜花生米是灵魂暗号！"
+    }
+];
+        
+        // 创建卡牌刻度
+        function createCardTicks() {
+            cardTicks.innerHTML = '';
+            for (let i = 0; i < 40; i++) {
+                const tick = document.createElement('div');
+                tick.className = 'tick';
+                const angle = i * 9;
+                tick.style.transform = `rotate(${angle}deg) translateY(-90px)`;
+                cardTicks.appendChild(tick);
+            }
+        }
+        
+        // 初始化创建卡牌刻度
+        createCardTicks();
+        
+        // 创建卡组
+        function createCardDeck() {
+            cardDeck.innerHTML = '';
+            
+            // 创建7张卡片组成卡组
+            for (let i = 0; i < 7; i++) {
+                const card = document.createElement('div');
+                card.className = 'deck-card';
+                
+                // 微调卡片堆叠位置，从中心点开始堆叠
+                // 使底部卡片向左下微微偏移，顶部卡片向右上微微偏移
+                card.style.transform = `translateX(${i * 1.5 - 5}px) translateY(${i * 1.5 - 5}px) rotateZ(${i * 0.5}deg)`;
+                card.style.zIndex = i; // 确保堆叠顺序正确
+                
+                // 手动设置样式以确保与CSS定义一致
+                card.style.background = 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)';
+                card.style.border = '2px solid rgba(255, 233, 191, 0.5)';
+                card.style.boxShadow = '0 8px 25px rgba(204, 146, 93, 0.35)';
+                
+                // 使卡片立即显示
+                setTimeout(() => {
+                    card.classList.add('active');
+                    // 添加激活状态的双层阴影
+                    card.style.boxShadow = '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)';
+                }, i * 100);
+                
+                cardDeck.appendChild(card);
+            }
+        }
+        
+        // 卡片飞入动画
+        function animateCardsFlyin() {
+            // 先清空卡组
+            cardDeck.innerHTML = '';
+            
+            // 清空已有卡片
+            const flyinContainer = document.createElement('div');
+            flyinContainer.style.position = 'fixed';
+            flyinContainer.style.top = '0';
+            flyinContainer.style.left = '0';
+            flyinContainer.style.width = '100%';
+            flyinContainer.style.height = '100%';
+            flyinContainer.style.pointerEvents = 'none';
+            flyinContainer.style.zIndex = '50';
+            document.body.appendChild(flyinContainer);
+            
+            // 创建15张飞入的卡片
+            const numCards = 15;
+            for (let i = 0; i < numCards; i++) {
+                const card = document.createElement('div');
+                card.className = 'fly-in-card';
+                
+                // 使卡片外观与卡组卡片一致
+                card.style.background = 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)';
+                card.style.border = '2px solid rgba(255, 233, 191, 0.5)';
+                card.style.boxShadow = '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)';
+                
+                // 生成更随机的起始位置 - 确保从四周不同方向飞入
+                let startX, startY;
+                
+                // 决定卡片从哪个方向飞入（上、下、左、右或四个角落）
+                const direction = Math.floor(Math.random() * 8);
+                
+                switch(direction) {
+                    case 0: // 上方
+                        startX = Math.random() * window.innerWidth;
+                        startY = -300;
+                        break;
+                    case 1: // 右上角
+                        startX = window.innerWidth + 200;
+                        startY = -300;
+                        break;
+                    case 2: // 右方
+                        startX = window.innerWidth + 200;
+                        startY = Math.random() * window.innerHeight;
+                        break;
+                    case 3: // 右下角
+                        startX = window.innerWidth + 200;
+                        startY = window.innerHeight + 300;
+                        break;
+                    case 4: // 下方
+                        startX = Math.random() * window.innerWidth;
+                        startY = window.innerHeight + 300;
+                        break;
+                    case 5: // 左下角
+                        startX = -300;
+                        startY = window.innerHeight + 300;
+                        break;
+                    case 6: // 左方
+                        startX = -300;
+                        startY = Math.random() * window.innerHeight;
+                        break;
+                    case 7: // 左上角
+                        startX = -300;
+                        startY = -300;
+                        break;
+                }
+                
+                // 设置卡片在视口中央
+                card.style.position = 'absolute';
+                card.style.top = '50%';
+                card.style.left = '50%';
+                card.style.marginTop = '-140px'; // 卡片高度的一半
+                card.style.marginLeft = '-100px'; // 卡片宽度的一半
+                
+                // 设置CSS变量用于动画
+                card.style.setProperty('--start-x', `${startX}px`);
+                card.style.setProperty('--start-y', `${startY}px`);
+                card.style.setProperty('--end-x', `0px`); // 飞向正中心
+                card.style.setProperty('--end-y', `0px`); // 飞向正中心
+                card.style.setProperty('--rotation', `${Math.random() * 360 - 180}deg`);
+                
+                // 添加动画
+                card.style.animation = `flyInCard 1.5s ${i * 0.08}s cubic-bezier(0.215, 0.61, 0.355, 1) forwards`;
+                
+                flyinContainer.appendChild(card);
+            }
+            
+            // 等所有卡片飞入后移除容器并创建卡组
+            setTimeout(() => {
+                flyinContainer.remove();
+                
+                // 先显示说明文字
+                deckInstruction.classList.add('active');
+                
+                // 然后创建卡组并显示
+                setTimeout(() => {
+                    createCardDeck();
+                    
+                    // 显示卡组中的卡片
+                    document.querySelectorAll('.deck-card').forEach((card, index) => {
+                        setTimeout(() => {
+                            card.classList.add('active');
+                        }, index * 100);
+                    });
+                }, 300);
+            }, 2500);
+        }
+        
+        
+        // 关闭卡牌时恢复卡组
+        closeCardBtn.addEventListener('click', () => {
+            // 隐藏卡牌容器
+            cardContainer.classList.remove('active');
+            
+            // 恢复卡组中的卡片并显示菱形元素
+            setTimeout(() => {
+                foodCard.classList.remove('flipped');
+                // 显示菱形元素（回到正面）
+                document.querySelector('.card-diamond').style.display = '';
+                // 移除隐藏背面菱形伪元素的类
+                foodCard.classList.remove('hide-diamonds');
+                // 恢复卡组中的卡片
+                createCardDeck();
+                document.querySelectorAll('.deck-card').forEach((card) => {
+                    card.classList.add('active');
+                });
+            }, 300);
+        });
+        
+        // 声音开关点击事件修改为实际控制音频
+        document.getElementById('sound-toggle').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            toggleSound(icon);
+        });
+    
+        
+        // 页面加载后激活标题动画
+        window.addEventListener('load', () => {
+            // 确保动画在加载屏幕消失后才开始
+            if (experienceScreen.style.opacity !== '0') {
+                document.querySelector('.main-title').style.animation = 'titleFloat 5s ease-in-out infinite, titleAppear 1.5s forwards';
+                document.querySelector('.subtitle').style.animation = 'subtitleAppear 1.5s 0.3s forwards';
+            }
+        });
+        
+        // 同步两个页面的控制按钮功能
+        document.getElementById('sound-toggle-2').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            toggleSound(icon);
+        });
+
+        // 统一的声音控制函数
+        function toggleSound(clickedIcon) {
+            const allIcons = document.querySelectorAll('#sound-toggle i, #sound-toggle-2 i');
+            
+            if (!isMuted) {
+                // 静音
+                bgMusic.pause();
+                allIcons.forEach(icon => {
+                    icon.classList.remove('fa-volume-up');
+                    icon.classList.add('fa-volume-mute');
+                });
+                isMuted = true;
+            } else {
+                // 播放
+                bgMusic.play();
+                allIcons.forEach(icon => {
+                    icon.classList.remove('fa-volume-mute');
+                    icon.classList.add('fa-volume-up');
+                });
+                isMuted = false;
+            }
+        }
+        
+        // 替换食物碎片创建函数为简单背景效果
+        function createBackground() {
+            // 体验页面不再需要动态生成背景元素
+            console.log("应用简洁背景样式");
+        }
+
+        // 添加抽卡功能代码
+        discoverFoodBtn.addEventListener('click', () => {
+            // 尝试播放音乐
+            bgMusic.play().catch(e => console.log('抽卡时播放失败:', e));
+            
+            // 随机选择一道菜
+            const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
+            
+            // 设置卡牌内容
+            foodImg.src = randomDish.image;
+            foodName.textContent = randomDish.name;
+            foodDescription.textContent = randomDish.description;
+            
+            // 抽取最上面的卡片
+            const topCard = document.querySelector('.deck-card:last-child');
+            if (topCard) {
+                // 复制一张卡片用于抽取动画
+                const drawingCard = topCard.cloneNode(true);
+                drawingCard.style.zIndex = "100";
+                
+                // 定位到相同位置
+                const rect = topCard.getBoundingClientRect();
+                const deckRect = cardDeck.getBoundingClientRect();
+                
+                drawingCard.style.position = "fixed";
+                drawingCard.style.top = rect.top + "px";
+                drawingCard.style.left = rect.left + "px";
+                drawingCard.style.width = rect.width + "px";
+                drawingCard.style.height = rect.height + "px";
+                drawingCard.style.margin = "0";
+                
+                // 确保样式与新的卡片设计一致
+                drawingCard.style.background = 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)';
+                drawingCard.style.border = '2px solid rgba(255, 233, 191, 0.5)';
+                drawingCard.style.boxShadow = '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)';
+                
+                // 修复居中问题
+                drawingCard.style.transformOrigin = "center center";
+                
+                // 将复制的卡片添加到body
+                document.body.appendChild(drawingCard);
+                
+                // 让原卡片隐藏
+                topCard.style.opacity = "0";
+                
+                // 执行抽卡动画
+                drawingCard.classList.add('drawing-card');
+                
+                // 动画结束后显示卡片容器
+                setTimeout(() => {
+                    // 移除动画卡片
+                    drawingCard.remove();
+                    
+                    // 显示卡牌容器
+                    cardContainer.classList.add('active');
+                    foodCard.classList.remove('flipped');
+                    
+                    // 获取卡牌内部元素并开始旋转动画
+                    const cardInner = foodCard.querySelector('.card-inner');
+                    cardInner.style.animation = 'none';
+                    cardInner.offsetHeight; // 触发重排
+                    cardInner.style.animation = null;
+                    cardInner.classList.remove('spinning');
+                    
+                    requestAnimationFrame(() => {
+                        cardInner.classList.add('spinning');
+                        
+                        cardInner.addEventListener('animationend', function handleAnimEnd() {
+                            cardInner.classList.remove('spinning');
+                            foodCard.classList.add('flipped');
+                            // 在卡片背面展示美食时隐藏菱形
+                            document.querySelector('.card-diamond').style.display = 'none';
+                            // 添加隐藏背面菱形伪元素的类
+                            foodCard.classList.add('hide-diamonds');
+                            cardInner.removeEventListener('animationend', handleAnimEnd);
+                        }, {once: true});
+                    });
+                }, 800);
+            }
+        });
+
+        // 添加背景装饰元素
+        function addBackgroundDecorations() {
+            // 为第一页添加装饰
+            const experienceDecorations = document.createElement('div');
+            experienceDecorations.className = 'background-decorations';
+            experienceDecorations.innerHTML = `
+                <div class="card-decoration decoration-top-left"></div>
+                <div class="card-decoration decoration-bottom-right"></div>
+            `;
+            experienceScreen.appendChild(experienceDecorations);
+            
+            // 为卡组页面添加装饰
+            const deckDecorations = document.createElement('div');
+            deckDecorations.className = 'background-decorations';
+            
+            // 添加浮动元素
+            for (let i = 0; i < 5; i++) {
+                const floatingEl = document.createElement('div');
+                floatingEl.className = 'floating-element';
+                
+                // 随机大小
+                const size = 100 + Math.random() * 200;
+                floatingEl.style.width = `${size}px`;
+                floatingEl.style.height = `${size}px`;
+                
+                // 随机位置
+                floatingEl.style.top = `${Math.random() * 80}%`;
+                floatingEl.style.left = `${Math.random() * 80}%`;
+                
+                // 随机动画延迟
+                floatingEl.style.animationDelay = `${Math.random() * 5}s`;
+                
+                deckDecorations.appendChild(floatingEl);
+            }
+            
+            // 添加固定装饰
+            deckDecorations.innerHTML += `
+                <div class="card-decoration decoration-top-left"></div>
+                <div class="card-decoration decoration-bottom-right"></div>
+            `;
+            
+            cardDeckContainer.appendChild(deckDecorations);
+        }
+
+        // 在页面加载完成后添加装饰元素
+        window.addEventListener('DOMContentLoaded', addBackgroundDecorations);
+
+        // 修改页面过渡动画函数，增强视觉效果
+        function transitionToCardDeck() {
+            // 隐藏第一个页面
+            experienceScreen.style.transform = 'translateY(-100%)';
+            experienceScreen.style.opacity = '0';
+            
+            // 创建过渡动画元素
+            const transitionOverlay = document.createElement('div');
+            transitionOverlay.style.position = 'fixed';
+            transitionOverlay.style.top = '0';
+            transitionOverlay.style.left = '0';
+            transitionOverlay.style.width = '100%';
+            transitionOverlay.style.height = '100%';
+            transitionOverlay.style.backgroundColor = 'var(--background-color)';
+            transitionOverlay.style.animation = 'pageTransition 1.2s forwards';
+            transitionOverlay.style.zIndex = '9';
+            transitionOverlay.style.boxShadow = 'inset 0 0 200px rgba(0, 0, 0, 0.2)';
+            document.body.appendChild(transitionOverlay);
+            
+            // 添加装饰元素提升过渡效果
+            const decorElements = document.createElement('div');
+            decorElements.style.position = 'fixed';
+            decorElements.style.top = '0';
+            decorElements.style.left = '0';
+            decorElements.style.width = '100%';
+            decorElements.style.height = '100%';
+            decorElements.style.zIndex = '10';
+            decorElements.style.pointerEvents = 'none';
+            
+            // 创建星星装饰
+            for (let i = 0; i < 20; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'absolute';
+                star.style.width = '3px';
+                star.style.height = '3px';
+                star.style.backgroundColor = 'white';
+                star.style.borderRadius = '50%';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.opacity = '0';
+                star.style.animation = `starFade 1s ${Math.random() * 0.5}s forwards`;
+                decorElements.appendChild(star);
+            }
+            
+            document.body.appendChild(decorElements);
+            
+            // 清空卡组 - 避免之前可能残留的卡片
+            cardDeck.innerHTML = '';
+            
+            // 页面过渡完成后显示卡组页面并移除过渡层
+            setTimeout(() => {
+                cardDeckContainer.classList.add('active');
+                
+                // 先显示卡组容器，再执行卡片飞入动画
+                // 执行卡片飞入动画 - 卡组会在动画结束后创建
+                animateCardsFlyin();
+                
+                // 移除过渡层和装饰
+                setTimeout(() => {
+                    transitionOverlay.remove();
+                    decorElements.remove();
+                }, 1200);
+            }, 700);
+        }
+
+        // 添加星星淡入淡出动画
+        const starFadeStyle = document.createElement('style');
+        starFadeStyle.textContent = `
+            @keyframes starFade {
+                0% { opacity: 0; transform: scale(0.5); }
+                50% { opacity: 1; transform: scale(1.5); }
+                100% { opacity: 0; transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(starFadeStyle);
+
+        // 创建丰富的背景元素
+        function createEnhancedBackground() {
+            // 为体验页面创建丰富背景
+            const experienceEnhanced = document.createElement('div');
+            experienceEnhanced.className = 'enhanced-background';
+            
+            // 添加纹理层
+            const textureLayer = document.createElement('div');
+            textureLayer.className = 'texture-layer';
+            experienceEnhanced.appendChild(textureLayer);
+            
+            // 添加网格覆盖层
+            const patternOverlay = document.createElement('div');
+            patternOverlay.className = 'pattern-overlay';
+            experienceEnhanced.appendChild(patternOverlay);
+            
+            // 添加光晕效果
+            const numGlows = 3;
+            for (let i = 0; i < numGlows; i++) {
+                const glow = document.createElement('div');
+                glow.className = 'glow-effect';
+                glow.style.top = `${Math.random() * 100}%`;
+                glow.style.left = `${Math.random() * 100}%`;
+                glow.style.animationDelay = `${Math.random() * 5}s`;
+                experienceEnhanced.appendChild(glow);
+            }
+            
+            // 添加气泡效果
+            const numBubbles = 10;
+            for (let i = 0; i < numBubbles; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                
+                // 设置随机大小和位置
+                const size = 50 + Math.random() * 200;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.top = `${Math.random() * 100}%`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                
+                experienceEnhanced.appendChild(bubble);
+            }
+            
+            // 添加动态线条
+            const linesContainer = document.createElement('div');
+            linesContainer.className = 'animated-lines';
+            
+            for (let i = 0; i < 10; i++) {
+                const line = document.createElement('div');
+                line.className = 'animated-line';
+                line.style.top = `${(i + 1) * 10}%`;
+                line.style.animationDelay = `${i * 1.5}s`;
+                linesContainer.appendChild(line);
+            }
+            
+            experienceEnhanced.appendChild(linesContainer);
+            
+            // 添加美食图标
+            const foodIcons = ['🍜', '🍣', '🍔', '🥘', '🍰', '🍕', '🥗', '🍦'];
+            for (let i = 0; i < 12; i++) {
+                const icon = document.createElement('div');
+                icon.className = 'food-icon';
+                icon.textContent = foodIcons[Math.floor(Math.random() * foodIcons.length)];
+                icon.style.top = `${Math.random() * 90 + 5}%`;
+                icon.style.left = `${Math.random() * 90 + 5}%`;
+                icon.style.setProperty('--rotation', `${Math.random() * 40 - 20}deg`);
+                icon.style.animationDelay = `${Math.random() * 5}s`;
+                icon.style.fontSize = `${Math.random() * 20 + 30}px`;
+                
+                experienceEnhanced.appendChild(icon);
+            }
+            
+            // 添加到体验页面
+            experienceScreen.appendChild(experienceEnhanced);
+            
+            // 复制一份到卡组页面，并做一些调整
+            const deckEnhanced = experienceEnhanced.cloneNode(true);
+            deckEnhanced.style.opacity = '0.7'; // 使卡组页面的背景略微暗一些，更好地突出卡片
+            
+            // 调整卡组页面的气泡和图标位置，使两个页面看起来不完全一样
+            deckEnhanced.querySelectorAll('.bubble, .food-icon, .glow-effect').forEach(el => {
+                el.style.top = `${Math.random() * 100}%`;
+                el.style.left = `${Math.random() * 100}%`;
+            });
+            
+            cardDeckContainer.appendChild(deckEnhanced);
+        }
+
+        // 页面加载完成后创建增强背景
+        window.addEventListener('DOMContentLoaded', () => {
+            createEnhancedBackground();
+            addBackgroundDecorations(); // 保留原有的装饰元素
+        });
+
+        // 页面加载完成后显示菱形（卡片正面状态）
+        window.addEventListener('DOMContentLoaded', () => {
+            // 在正面时显示菱形
+            const cardDiamond = document.querySelector('.card-diamond');
+            if (cardDiamond) {
+                cardDiamond.style.display = ''; // 默认显示
+            }
+        });
+
+        // 移除关闭按钮，改为点击卡片外区域关闭
+        cardContainer.addEventListener('click', function(event) {
+            // 检查点击的是否为卡片容器本身（而不是卡片或其内部元素）
+            if (event.target === cardContainer) {
+                // 关闭卡片
+                cardContainer.classList.remove('active');
+                
+                // 恢复卡组中的卡片并显示菱形元素
+                setTimeout(() => {
+                    foodCard.classList.remove('flipped');
+                    // 显示菱形元素（回到正面）
+                    document.querySelector('.card-diamond').style.display = '';
+                    // 移除隐藏背面菱形伪元素的类
+                    foodCard.classList.remove('hide-diamonds');
+                    foodCard.classList.remove('spinning-card');
+                    // 恢复卡组中的卡片
+                    createCardDeck();
+                    document.querySelectorAll('.deck-card').forEach((card) => {
+                        card.classList.add('active');
+                    });
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html> 
