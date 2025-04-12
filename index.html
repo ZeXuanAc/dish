@@ -815,10 +815,30 @@
             border-bottom-right-radius: 10px;
         }
         
+        /* 添加样式移除卡片背面显示的菱形 */
+        .card-back::before {
+            display: none !important;
+        }
+
+        /* 在卡片背面展示内容前面的菱形元素 */
+        .card-back-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: none;
+            z-index: 1;
+        }
+
+        /* 修改卡片背面内容显示 */
         .card-back-content {
             display: flex;
             flex-direction: column;
             height: 100%;
+            position: relative;
+            z-index: 2; /* 提高内容层级 */
         }
         
         .card-img-container {
@@ -843,7 +863,7 @@
         .card-title {
             font-size: 24px;
             font-weight: 700;
-            color: #fc9fad;
+            color: #fc94a4;
             margin-bottom: 10px;
             font-family: 'Noto Serif SC', serif;
         }
@@ -859,11 +879,44 @@
             display: none;
         }
         
-        /* 优化卡牌旋转动画，缩短时间 */
+        /* 优化卡牌旋转动画，减少频闪问题 */
         @keyframes cardSpin {
-            0% { transform: rotateY(0deg); }
-            70% { transform: rotateY(1080deg); } /* 减少为3圈 */
-            100% { transform: rotateY(1260deg); } /* 最后减少为3.5圈 */
+            0% { 
+                transform: rotateY(0deg) translateZ(0); 
+                box-shadow: 0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25);
+            }
+            20% {
+                box-shadow: 0 15px 35px rgba(204, 146, 93, 0.4), 0 0 20px rgba(255, 215, 148, 0.3);
+            }
+            70% { 
+                transform: rotateY(1080deg) translateZ(0); /* 减少为3圈，添加translateZ(0)强制GPU加速 */
+                box-shadow: 0 15px 35px rgba(204, 146, 93, 0.4), 0 0 20px rgba(255, 215, 148, 0.3);
+            } 
+            100% { 
+                transform: rotateY(1260deg) translateZ(0); /* 最后减少为3.5圈，添加translateZ(0)强制GPU加速 */
+                box-shadow: 0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25);
+            }
+        }
+        
+        /* 添加卡片翻转时的平滑过渡 */
+        .food-card .card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        
+        /* 卡片面的3D优化 */
+        .card-face {
+            backface-visibility: hidden;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        .card-front, .card-back {
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            will-change: transform;
         }
         
         .card-inner.spinning {
@@ -1098,9 +1151,10 @@
             0% { 
                 transform: translate(0, 0) scale(1) rotateY(0); 
                 box-shadow: 0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25);
+                will-change: transform, box-shadow; /* 提示浏览器这些属性将会改变，优化性能 */
             }
-            50% { 
-                transform: translate(0, -50px) scale(1.1) rotateY(0);
+            40% { 
+                transform: translate(0, -45px) scale(1.08) rotateY(0);
                 box-shadow: 0 15px 35px rgba(204, 146, 93, 0.4), 0 0 20px rgba(255, 215, 148, 0.3);
             }
             100% { 
@@ -1119,7 +1173,7 @@
             font-family: 'Noto Serif SC', serif;
             font-size: 26px; /* 稍微调小指示文字大小 */
             color: var(--primary-color);
-            margin-bottom: 35px; /* 增加与卡组间距 */
+            margin-bottom: 10px; /* 减少与卡组间距，从35px减至10px */
             text-align: center;
             opacity: 0;
             transform: translateY(20px);
@@ -1137,6 +1191,10 @@
                 transform: translate(var(--start-x), var(--start-y)) scale(0.3) rotate(var(--rotation));
                 opacity: 0;
                 box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+                will-change: transform, opacity; /* 提示浏览器这些属性将会改变，优化性能 */
+            }
+            20% {
+                opacity: 0.6;
             }
             70% {
                 opacity: 1;
@@ -1323,7 +1381,7 @@
         /* 卡组页标题和说明文字位置调整 */
         .card-deck-container .main-title {
             margin-top: -20px; /* 之前是-100px，大幅减少上移距离 */
-            margin-bottom: 30px; /* 增加与指示文字间距 */
+            margin-bottom: 10px; /* 将间距从30px减小到10px */
         }
 
         /* 调整卡组与按钮间距 */
@@ -1376,12 +1434,14 @@
             .card-deck-container .main-title {
                 margin-top: 20px; /* 正值使标题下移 */
                 font-size: 48px;
+                margin-bottom: 8px; /* 减小间距 */
             }
             
             /* 适当减小指示文字尺寸 */
             .deck-instruction {
                 font-size: 24px;
-                margin-top: 20px;
+                margin-top: 0; /* 移除顶部间距 */
+                margin-bottom: 8px; /* 减小间距 */
             }
             
             /* 确保卡组位置合适 */
@@ -1406,10 +1466,12 @@
             .card-deck-container .main-title {
                 font-size: 42px;
                 margin-top: 30px;
+                margin-bottom: 5px; /* 更小的间距 */
             }
             
             .deck-instruction {
                 font-size: 22px;
+                margin-bottom: 5px; /* 更小的间距 */
             }
             
             /* 适当调整卡组尺寸 */
@@ -1558,6 +1620,49 @@
         .food-card.hide-diamonds .card-back:before,
         .food-card.hide-diamonds .card-back:after {
             display: none;
+        }
+
+        /* 卡组页标题和说明文字位置调整 */
+        .card-deck-container .main-title {
+            margin-top: -20px; /* 之前是-20px */
+            margin-bottom: 15px; /* 减小与指示文字的间距，从30px减至15px */
+        }
+        
+        /* 调整卡组指示文字 */
+        .deck-instruction {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 26px;
+            color: var(--primary-color);
+            margin-bottom: 15px; /* 减小与卡组之间的间距，从35px减至15px */
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
+        }
+        
+        /* 针对不同屏幕尺寸的响应式调整 */
+        @media (max-height: 700px) {
+            .card-deck-container .main-title {
+                margin-top: 20px;
+                font-size: 48px;
+                margin-bottom: 10px; /* 在小屏幕上进一步减小间距 */
+            }
+            
+            .deck-instruction {
+                font-size: 22px;
+                margin-bottom: 10px; /* 在小屏幕上进一步减小间距 */
+            }
+        }
+
+        /* 创建一个新样式移除背景中的菱形元素 */
+        .food-card .card-inner .card-back::after {
+            display: none !important;
+        }
+
+        /* 移除黄色底部区域中的菱形 */
+        .card-face.card-back::before, 
+        .card-face.card-back::after {
+            display: none !important;
         }
     </style>
 </head>
@@ -1939,42 +2044,60 @@
         // 初始化创建卡牌刻度
         createCardTicks();
         
-        // 创建卡组
+        // 优化卡组创建，减少频闪
         function createCardDeck() {
             cardDeck.innerHTML = '';
+            
+            // 创建文档片段，减少DOM操作次数
+            const fragment = document.createDocumentFragment();
             
             // 创建7张卡片组成卡组
             for (let i = 0; i < 7; i++) {
                 const card = document.createElement('div');
                 card.className = 'deck-card';
                 
-                // 微调卡片堆叠位置，从中心点开始堆叠
-                // 使底部卡片向左下微微偏移，顶部卡片向右上微微偏移
-                card.style.transform = `translateX(${i * 1.5 - 5}px) translateY(${i * 1.5 - 5}px) rotateZ(${i * 0.5}deg)`;
-                card.style.zIndex = i; // 确保堆叠顺序正确
+                // 批量设置样式减少重排
+                const styles = {
+                    transform: `translateX(${i * 1.5 - 5}px) translateY(${i * 1.5 - 5}px) rotateZ(${i * 0.5}deg) translateZ(0)`, // 添加translateZ(0)强制GPU加速
+                    zIndex: i.toString(),
+                    background: 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)',
+                    border: '2px solid rgba(255, 233, 191, 0.5)',
+                    boxShadow: '0 8px 25px rgba(204, 146, 93, 0.35)',
+                    opacity: '0',
+                    transition: 'opacity 0.3s ease, transform 0.5s ease, box-shadow 0.5s ease' // 添加平滑过渡
+                };
                 
-                // 手动设置样式以确保与CSS定义一致
-                card.style.background = 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)';
-                card.style.border = '2px solid rgba(255, 233, 191, 0.5)';
-                card.style.boxShadow = '0 8px 25px rgba(204, 146, 93, 0.35)';
+                Object.assign(card.style, styles);
                 
-                // 使卡片立即显示
-                setTimeout(() => {
-                    card.classList.add('active');
-                    // 添加激活状态的双层阴影
-                    card.style.boxShadow = '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)';
-                }, i * 100);
-                
-                cardDeck.appendChild(card);
+                fragment.appendChild(card);
             }
+            
+            // 一次性添加所有卡片到DOM
+            cardDeck.appendChild(fragment);
+            
+            // 使用RAF和setTimeout错开显示时间，使动画更流畅
+            requestAnimationFrame(() => {
+                const cards = cardDeck.querySelectorAll('.deck-card');
+                
+                cards.forEach((card, index) => {
+                    // 错开显示时间，减少同时变化造成的卡顿
+                    setTimeout(() => {
+                        // 平滑显示卡片
+                        card.style.opacity = '1';
+                        card.classList.add('active');
+                        // 添加激活状态的双层阴影
+                        card.style.boxShadow = '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)';
+                    }, index * 70); // 稍微缩短时间间隔，使动画更流畅
+                });
+            });
         }
         
-        // 卡片飞入动画
+        // 优化卡片飞入动画，减少频闪
         function animateCardsFlyin() {
             // 先清空卡组
             cardDeck.innerHTML = '';
             
-            // 清空已有卡片
+            // 使用文档片段减少DOM操作和重排
             const flyinContainer = document.createElement('div');
             flyinContainer.style.position = 'fixed';
             flyinContainer.style.top = '0';
@@ -1983,24 +2106,31 @@
             flyinContainer.style.height = '100%';
             flyinContainer.style.pointerEvents = 'none';
             flyinContainer.style.zIndex = '50';
-            document.body.appendChild(flyinContainer);
             
-            // 创建15张飞入的卡片
-            const numCards = 15;
+            // 创建文档片段，减少DOM重排次数
+            const fragment = document.createDocumentFragment();
+            
+            // 减少卡片数量以提高性能，从15张减少到10张
+            const numCards = 10;
             for (let i = 0; i < numCards; i++) {
                 const card = document.createElement('div');
                 card.className = 'fly-in-card';
                 
-                // 使卡片外观与卡组卡片一致
-                card.style.background = 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)';
-                card.style.border = '2px solid rgba(255, 233, 191, 0.5)';
-                card.style.boxShadow = '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)';
+                // 设置CSS变量前批量设置样式
+                const styles = {
+                    background: 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)',
+                    border: '2px solid rgba(255, 233, 191, 0.5)',
+                    boxShadow: '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)',
+                    transform: 'translateZ(0)' // 强制GPU加速
+                };
+                
+                Object.assign(card.style, styles);
                 
                 // 生成更随机的起始位置 - 确保从四周不同方向飞入
                 let startX, startY;
                 
-                // 决定卡片从哪个方向飞入（上、下、左、右或四个角落）
-                const direction = Math.floor(Math.random() * 8);
+                // 更均匀地分布飞入方向，减少卡片重叠概率
+                const direction = Math.floor(i % 8); // 确保方向均匀分布
                 
                 switch(direction) {
                     case 0: // 上方
@@ -2051,30 +2181,31 @@
                 card.style.setProperty('--end-y', `0px`); // 飞向正中心
                 card.style.setProperty('--rotation', `${Math.random() * 360 - 180}deg`);
                 
-                // 添加动画
-                card.style.animation = `flyInCard 1.5s ${i * 0.08}s cubic-bezier(0.215, 0.61, 0.355, 1) forwards`;
+                // 错开动画时间，减少同时变化造成的卡顿
+                const staggerDelay = i * 0.1; // 增大时间间隔
+                card.style.animation = `flyInCard 1.5s ${staggerDelay}s cubic-bezier(0.215, 0.61, 0.355, 1) forwards`;
                 
-                flyinContainer.appendChild(card);
+                fragment.appendChild(card);
             }
+            
+            // 一次性添加所有卡片，减少重排
+            flyinContainer.appendChild(fragment);
+            document.body.appendChild(flyinContainer);
             
             // 等所有卡片飞入后移除容器并创建卡组
             setTimeout(() => {
-                flyinContainer.remove();
+                // 使用淡出效果移除飞入卡片，防止突然消失
+                flyinContainer.style.transition = 'opacity 0.5s ease';
+                flyinContainer.style.opacity = '0';
                 
                 // 先显示说明文字
                 deckInstruction.classList.add('active');
                 
-                // 然后创建卡组并显示
+                // 在卡片容器淡出完成后移除并创建卡组
                 setTimeout(() => {
+                    flyinContainer.remove();
                     createCardDeck();
-                    
-                    // 显示卡组中的卡片
-                    document.querySelectorAll('.deck-card').forEach((card, index) => {
-                        setTimeout(() => {
-                            card.classList.add('active');
-                        }, index * 100);
-                    });
-                }, 300);
+                }, 500);
             }, 2500);
         }
         
@@ -2150,7 +2281,7 @@
             console.log("应用简洁背景样式");
         }
 
-        // 添加抽卡功能代码
+        // 添加抽卡功能代码 - 优化抽卡动画，减少频闪
         discoverFoodBtn.addEventListener('click', () => {
             // 尝试播放音乐
             bgMusic.play().catch(e => console.log('抽卡时播放失败:', e));
@@ -2158,77 +2289,112 @@
             // 随机选择一道菜
             const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
             
-            // 设置卡牌内容
-            foodImg.src = randomDish.image;
-            foodName.textContent = randomDish.name;
-            foodDescription.textContent = randomDish.description;
-            
-            // 抽取最上面的卡片
-            const topCard = document.querySelector('.deck-card:last-child');
-            if (topCard) {
-                // 复制一张卡片用于抽取动画
-                const drawingCard = topCard.cloneNode(true);
-                drawingCard.style.zIndex = "100";
+            // 设置卡牌内容 - 预加载图片以避免翻转后加载造成的闪烁
+            const preloadImg = new Image();
+            preloadImg.onload = function() {
+                // 图片加载完成后设置
+                foodImg.src = randomDish.image;
+                foodName.textContent = randomDish.name;
+                foodDescription.textContent = randomDish.description;
                 
-                // 定位到相同位置
-                const rect = topCard.getBoundingClientRect();
-                const deckRect = cardDeck.getBoundingClientRect();
-                
-                drawingCard.style.position = "fixed";
-                drawingCard.style.top = rect.top + "px";
-                drawingCard.style.left = rect.left + "px";
-                drawingCard.style.width = rect.width + "px";
-                drawingCard.style.height = rect.height + "px";
-                drawingCard.style.margin = "0";
-                
-                // 确保样式与新的卡片设计一致
-                drawingCard.style.background = 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)';
-                drawingCard.style.border = '2px solid rgba(255, 233, 191, 0.5)';
-                drawingCard.style.boxShadow = '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)';
-                
-                // 修复居中问题
-                drawingCard.style.transformOrigin = "center center";
-                
-                // 将复制的卡片添加到body
-                document.body.appendChild(drawingCard);
-                
-                // 让原卡片隐藏
-                topCard.style.opacity = "0";
-                
-                // 执行抽卡动画
-                drawingCard.classList.add('drawing-card');
-                
-                // 动画结束后显示卡片容器
-                setTimeout(() => {
-                    // 移除动画卡片
-                    drawingCard.remove();
+                // 抽取最上面的卡片
+                const topCard = document.querySelector('.deck-card:last-child');
+                if (topCard) {
+                    // 复制一张卡片用于抽取动画
+                    const drawingCard = topCard.cloneNode(true);
+                    drawingCard.style.zIndex = "100";
                     
-                    // 显示卡牌容器
-                    cardContainer.classList.add('active');
-                    foodCard.classList.remove('flipped');
+                    // 批量设置样式减少重排
+                    const rect = topCard.getBoundingClientRect();
+                    const styles = {
+                        position: "fixed",
+                        top: rect.top + "px",
+                        left: rect.left + "px",
+                        width: rect.width + "px",
+                        height: rect.height + "px",
+                        margin: "0",
+                        background: 'linear-gradient(135deg, #cb8c46, #e8c66d, #cb8c46)',
+                        border: '2px solid rgba(255, 233, 191, 0.5)',
+                        boxShadow: '0 10px 30px rgba(204, 146, 93, 0.35), 0 0 15px rgba(255, 215, 148, 0.25)',
+                        transformOrigin: "center center",
+                        transform: 'translateZ(0)' // 强制GPU加速
+                    };
                     
-                    // 获取卡牌内部元素并开始旋转动画
-                    const cardInner = foodCard.querySelector('.card-inner');
-                    cardInner.style.animation = 'none';
-                    cardInner.offsetHeight; // 触发重排
-                    cardInner.style.animation = null;
-                    cardInner.classList.remove('spinning');
+                    Object.assign(drawingCard.style, styles);
                     
+                    // 让原卡片隐藏前淡出，避免突然消失
+                    topCard.style.transition = 'opacity 0.3s ease';
+                    topCard.style.opacity = "0";
+                    
+                    // 将复制的卡片添加到body
+                    document.body.appendChild(drawingCard);
+                    
+                    // 执行抽卡动画
                     requestAnimationFrame(() => {
-                        cardInner.classList.add('spinning');
-                        
-                        cardInner.addEventListener('animationend', function handleAnimEnd() {
-                            cardInner.classList.remove('spinning');
-                            foodCard.classList.add('flipped');
-                            // 在卡片背面展示美食时隐藏菱形
-                            document.querySelector('.card-diamond').style.display = 'none';
-                            // 添加隐藏背面菱形伪元素的类
-                            foodCard.classList.add('hide-diamonds');
-                            cardInner.removeEventListener('animationend', handleAnimEnd);
-                        }, {once: true});
+                        drawingCard.classList.add('drawing-card');
                     });
-                }, 800);
-            }
+                    
+                    // 动画结束后显示卡片容器，时机设置得更准确，避免闪烁
+                    setTimeout(() => {
+                        // 创建遮罩层实现平滑过渡
+                        const transitionOverlay = document.createElement('div');
+                        transitionOverlay.style.position = 'fixed';
+                        transitionOverlay.style.top = '0';
+                        transitionOverlay.style.left = '0';
+                        transitionOverlay.style.width = '100%';
+                        transitionOverlay.style.height = '100%';
+                        transitionOverlay.style.backgroundColor = 'rgba(0,0,0,0.1)';
+                        transitionOverlay.style.opacity = '0';
+                        transitionOverlay.style.transition = 'opacity 0.3s ease';
+                        transitionOverlay.style.zIndex = '99';
+                        document.body.appendChild(transitionOverlay);
+                        
+                        // 淡入遮罩层
+                        requestAnimationFrame(() => {
+                            transitionOverlay.style.opacity = '1';
+                            
+                            // 遮罩层显示后，移除动画卡片，显示卡牌容器
+                            setTimeout(() => {
+                                drawingCard.remove();
+                                
+                                // 显示卡牌容器
+                                cardContainer.classList.add('active');
+                                foodCard.classList.remove('flipped');
+                                
+                                // 获取卡牌内部元素并开始旋转动画
+                                const cardInner = foodCard.querySelector('.card-inner');
+                                cardInner.style.animation = 'none';
+                                void cardInner.offsetHeight; // 触发重排
+                                
+                                cardInner.classList.add('spinning');
+                                
+                                // 淡出遮罩层
+                                transitionOverlay.style.opacity = '0';
+                                setTimeout(() => {
+                                    transitionOverlay.remove();
+                                }, 300);
+                                
+                                // 监听动画结束翻转卡片
+                                cardInner.addEventListener('animationend', function handleAnimEnd() {
+                                    cardInner.classList.remove('spinning');
+                                    // 平滑翻转
+                                    requestAnimationFrame(() => {
+                                        foodCard.classList.add('flipped');
+                                    });
+                                    // 在卡片背面展示美食时隐藏菱形
+                                    document.querySelector('.card-diamond').style.display = 'none';
+                                    // 添加隐藏背面菱形伪元素的类
+                                    foodCard.classList.add('hide-diamonds');
+                                    cardInner.removeEventListener('animationend', handleAnimEnd);
+                                }, {once: true});
+                            }, 300);
+                        });
+                    }, 800);
+                }
+            };
+            
+            // 开始加载图片
+            preloadImg.src = randomDish.image;
         });
 
         // 添加背景装饰元素
